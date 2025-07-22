@@ -1,5 +1,6 @@
 package com.harmless004.aicopilot.services;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.util.TextRange;
@@ -103,36 +104,39 @@ public class CodeContextAnalyzer {
 
     /**
      * Extracts structural context - classes, methods, functions around cursor
+     * THREAD SAFE VERSION - wraps all PSI access in read actions
      */
     private String extractStructureContext(@NotNull PsiFile file, int offset) {
-        List<String> structure = new ArrayList<>();
+        return ApplicationManager.getApplication().runReadAction((com.intellij.openapi.util.Computable<String>) () -> {
+            List<String> structure = new ArrayList<>();
 
-        try {
-            PsiElement element = file.findElementAt(offset);
-            if (element != null) {
+            try {
+                PsiElement element = file.findElementAt(offset);
+                if (element != null) {
 
-                // Find containing structures using PSI tree walking
-                PsiElement current = element;
-                while (current != null && structure.size() < 5) {
-                    String elementInfo = getElementStructureInfo(current);
-                    if (elementInfo != null && !elementInfo.isEmpty()) {
-                        structure.add(elementInfo);
+                    // Find containing structures using PSI tree walking
+                    PsiElement current = element;
+                    while (current != null && structure.size() < 5) {
+                        String elementInfo = getElementStructureInfo(current);
+                        if (elementInfo != null && !elementInfo.isEmpty()) {
+                            structure.add(elementInfo);
+                        }
+                        current = current.getParent();
                     }
-                    current = current.getParent();
                 }
+            } catch (Exception e) {
+                // Fallback to text-based analysis if PSI fails
+                return extractStructureFromText(file, offset);
             }
-        } catch (Exception e) {
-            // Fallback to text-based analysis if PSI fails
-            return extractStructureFromText(file, offset);
-        }
 
-        if (structure.isEmpty()) {
-            return extractStructureFromText(file, offset);
-        }
+            if (structure.isEmpty()) {
+                return extractStructureFromText(file, offset);
+            }
 
-        return structure.stream()
-                .distinct()
-                .collect(Collectors.joining("\n"));
+            return structure.stream()
+                    .distinct()
+                    .collect(Collectors.joining("\n"));
+        });
     }
 
     /**
@@ -324,39 +328,43 @@ public class CodeContextAnalyzer {
     }
 
     /**
-     * Analyzes current context for completion hints
+     * Analyzes current context for completion hints - THREAD SAFE
      */
     public CodeContext analyzeCurrentContext(@NotNull PsiFile file, int offset) {
-        String currentLine = getCurrentLineText(file, offset);
+        return ApplicationManager.getApplication().runReadAction((com.intellij.openapi.util.Computable<CodeContext>) () -> {
+            String currentLine = getCurrentLineText(file, offset);
 
-        boolean inComment = isInComment(file, offset);
-        boolean inMethod = isInMethod(file, offset);
-        boolean inClass = isInClass(file, offset);
+            boolean inComment = isInComment(file, offset);
+            boolean inMethod = isInMethod(file, offset);
+            boolean inClass = isInClass(file, offset);
 
-        CompletionContext context = determineCompletionContext(currentLine, file, offset);
+            CompletionContext context = determineCompletionContext(currentLine, file, offset);
 
-        return new CodeContext(inMethod, inClass, inComment, context, currentLine);
+            return new CodeContext(inMethod, inClass, inComment, context, currentLine);
+        });
     }
 
     /**
-     * Check if cursor is in a comment
+     * Check if in comment using text analysis - THREAD SAFE
      */
     private boolean isInComment(@NotNull PsiFile file, int offset) {
-        try {
-            PsiElement element = file.findElementAt(offset);
-            while (element != null) {
-                if (element instanceof PsiComment ||
-                        element.getClass().getSimpleName().toLowerCase().contains("comment")) {
-                    return true;
+        return ApplicationManager.getApplication().runReadAction((com.intellij.openapi.util.Computable<Boolean>) () -> {
+            try {
+                PsiElement element = file.findElementAt(offset);
+                while (element != null) {
+                    if (element instanceof PsiComment ||
+                            element.getClass().getSimpleName().toLowerCase().contains("comment")) {
+                        return true;
+                    }
+                    element = element.getParent();
                 }
-                element = element.getParent();
+            } catch (Exception e) {
+                // Text-based fallback
+                String line = getCurrentLineText(file, offset).trim();
+                return line.startsWith("//") || line.startsWith("/*") || line.startsWith("#");
             }
-        } catch (Exception e) {
-            // Text-based fallback
-            String line = getCurrentLineText(file, offset).trim();
-            return line.startsWith("//") || line.startsWith("/*") || line.startsWith("#");
-        }
-        return false;
+            return false;
+        });
     }
 
     /**

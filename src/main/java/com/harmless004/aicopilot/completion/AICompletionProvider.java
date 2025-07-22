@@ -96,19 +96,25 @@ public class AICompletionProvider extends CompletionProvider<CompletionParameter
             return false;
         }
 
-        // Check if we're in a comment (common trigger scenario)
-        if (isInComment(element)) {
+        // Get current line for analysis
+        String currentLine = getCurrentLine(parameters.getEditor(), parameters.getOffset());
+
+        // ALWAYS trigger for comments (most important use case)
+        if (isInComment(element) || currentLine.trim().startsWith("//")) {
             return true;
         }
 
-        // Check if we're in incomplete code
+        // Trigger for incomplete code patterns
         if (isIncompleteCode(parameters)) {
             return true;
         }
 
-        // Check minimum length requirement
-        String currentLine = getCurrentLine(parameters.getEditor(), parameters.getOffset());
-        return currentLine.trim().length() >= MIN_TRIGGER_LENGTH;
+        // Be more aggressive - trigger for any reasonable context
+        if (currentLine.trim().length() >= MIN_TRIGGER_LENGTH) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -179,16 +185,21 @@ public class AICompletionProvider extends CompletionProvider<CompletionParameter
         // Create lookup element with AI icon and priority
         LookupElement lookupElement = LookupElementBuilder
                 .create(cleanSuggestion)
-                .withPresentableText("✨ " + truncateForDisplay(cleanSuggestion))
-                .withTypeText("AI Suggestion")
+                .withPresentableText("🤖 " + truncateForDisplay(cleanSuggestion))
+                .withTypeText("AI Generated", true)
                 .withBoldness(true)
                 .withInsertHandler((context, item) -> {
                     // Custom insert handler for multi-line suggestions
                     handleAIInsert(context, cleanSuggestion);
                 });
 
-        // Add with high priority so it appears at top
-        result.withPrefixMatcher("").addElement(PrioritizedLookupElement.withPriority(lookupElement, 1000));
+        // Add with VERY high priority so it appears at top
+        result.addElement(PrioritizedLookupElement.withPriority(lookupElement, 10000));
+
+        // Force the result to show even if there are no other completions
+        result.stopHere();
+
+        LOG.info("Added AI suggestion to completion results: " + truncateForDisplay(cleanSuggestion));
     }
 
     /**

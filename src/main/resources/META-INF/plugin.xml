@@ -11,7 +11,6 @@
         • Context-aware suggestions based on your current code
         • Support for multiple programming languages
         • Comment-to-code generation
-        • Configurable AI providers (OpenAI, Claude)
         • Fast response times with intelligent caching
         • Environment variable based configuration for security
 
@@ -42,33 +41,16 @@
     <!-- Plugin version -->
     <version>1.0.0</version>
 
-    <!-- Compatible with IntelliJ IDEA 2023.1+ with Java 17 support -->
-    <idea-version since-build="231.8109"/>
+    <!-- Compatible with IntelliJ IDEA 2023.1+ -->
+    <idea-version since-build="231"/>
 
     <!-- Plugin dependencies -->
     <depends>com.intellij.modules.platform</depends>
-    <depends>com.intellij.modules.java</depends>
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Application services -->
-        <applicationService serviceImplementation="com.harmless004.aicopilot.services.AIService"/>
-
-        <!-- Completion provider -->
+        <!-- Completion provider - will work for all file types -->
         <completion.contributor
-                language="JAVA"
-                implementationClass="com.harmless004.aicopilot.completion.AICompletionContributor"/>
-        <completion.contributor
-                language="Python"
-                implementationClass="com.harmless004.aicopilot.completion.AICompletionContributor"/>
-        <completion.contributor
-                language="JavaScript"
-                implementationClass="com.harmless004.aicopilot.completion.AICompletionContributor"/>
-        <completion.contributor
-                language="TypeScript"
-                implementationClass="com.harmless004.aicopilot.completion.AICompletionContributor"/>
-        <completion.contributor
-                language="kotlin"
                 implementationClass="com.harmless004.aicopilot.completion.AICompletionContributor"/>
     </extensions>
 
@@ -81,8 +63,8 @@
                     class="com.harmless004.aicopilot.actions.TriggerCompletionAction"
                     text="Trigger AI Completion"
                     description="Manually trigger AI code completion">
-                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SPACE"/>
-                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="cmd alt SPACE"/>
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift ENTER"/>
+                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="shift F1"/>
             </action>
         </group>
     </actions>
