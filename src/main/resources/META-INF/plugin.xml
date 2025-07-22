@@ -1,0 +1,89 @@
+<idea-plugin>
+    <id>com.harmless004.aicopilot</id>
+    <name>AI Copilot</name>
+    <vendor email="harmless004@example.com" url="https://github.com/harmless004">harmless004</vendor>
+
+    <description><![CDATA[
+        AI-powered code completion assistant for IntelliJ IDEA that provides intelligent code suggestions
+        using OpenAI GPT or Anthropic Claude. Features include:
+
+        • Real-time code completion with AI assistance
+        • Context-aware suggestions based on your current code
+        • Support for multiple programming languages
+        • Comment-to-code generation
+        • Configurable AI providers (OpenAI, Claude)
+        • Fast response times with intelligent caching
+        • Environment variable based configuration for security
+
+        Simply start typing or add a comment describing what you want to code, and get intelligent
+        suggestions powered by state-of-the-art AI models.
+
+        Configuration:
+        Set environment variables:
+        - OPENAI_API_KEY for OpenAI GPT-4
+        - ANTHROPIC_API_KEY for Anthropic Claude
+        - AI_PROVIDER=OPENAI or AI_PROVIDER=CLAUDE (optional, defaults to OpenAI)
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <h3>Version 1.0.0</h3>
+        <ul>
+            <li>Initial release</li>
+            <li>OpenAI GPT-4 integration</li>
+            <li>Anthropic Claude integration</li>
+            <li>Real-time code completion</li>
+            <li>Context-aware suggestions</li>
+            <li>Multi-language support</li>
+            <li>Environment variable configuration</li>
+            <li>Response caching</li>
+        </ul>
+    ]]></change-notes>
+
+    <!-- Plugin version -->
+    <version>1.0.0</version>
+
+    <!-- Compatible with IntelliJ IDEA 2023.1+ with Java 17 support -->
+    <idea-version since-build="231.8109"/>
+
+    <!-- Plugin dependencies -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.modules.lang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Application services -->
+        <applicationService serviceImplementation="com.harmless004.aicopilot.services.AIService"/>
+
+        <!-- Completion provider -->
+        <completion.contributor
+                language="JAVA"
+                implementationClass="com.harmless004.aicopilot.completion.AICompletionContributor"/>
+        <completion.contributor
+                language="Python"
+                implementationClass="com.harmless004.aicopilot.completion.AICompletionContributor"/>
+        <completion.contributor
+                language="JavaScript"
+                implementationClass="com.harmless004.aicopilot.completion.AICompletionContributor"/>
+        <completion.contributor
+                language="TypeScript"
+                implementationClass="com.harmless004.aicopilot.completion.AICompletionContributor"/>
+        <completion.contributor
+                language="kotlin"
+                implementationClass="com.harmless004.aicopilot.completion.AICompletionContributor"/>
+    </extensions>
+
+    <actions>
+        <!-- Main actions -->
+        <group id="AICopilotActions" text="AI Copilot" popup="true">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+
+            <action id="AICopilot.TriggerCompletion"
+                    class="com.harmless004.aicopilot.actions.TriggerCompletionAction"
+                    text="Trigger AI Completion"
+                    description="Manually trigger AI code completion">
+                <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SPACE"/>
+                <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="cmd alt SPACE"/>
+            </action>
+        </group>
+    </actions>
+</idea-plugin>
