@@ -4,7 +4,7 @@ build/
 *.jar
 *.war
 out/
-
+.run/
 
 .idea/
 *.iml
@@ -16,11 +16,11 @@ out/
 .env
 *.env
 secrets.properties
-
+**/run.xml
 
 .DS_Store
 Thumbs.db
 *.log
 
 
-idea-sandbox/
+idea-sandbox/.run/
