@@ -25,12 +25,12 @@ Prerequisites
 
 IntelliJ IDEA 2023.1+ (Community or Ultimate)
 Java 17+
-OpenAI API key (Get one here)
+OpenAI API key 
 
 Installation Steps
 
 Clone the repository:
-bashgit clone https://github.com/Harmless04/intellij-ai-copilot-plugin.git
+git clone https://github.com/Harmless04/intellij-ai-copilot-plugin.git
 cd intellij-ai-copilot-plugin
 
 Set your OpenAI API key:
