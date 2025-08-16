@@ -16,9 +16,7 @@ Robust error handling - Graceful fallbacks and comprehensive logging
 Memory efficient - Smart resource management with automatic cleanup
 
 
-🚀 Demo
-🎥 Watch the Full Demo - https://drive.google.com/drive/folders/1XB0p0y3gpD_-unViDlKCvdmKOA5Avclp?usp=share_link
-4-minute walkthrough of architecture + live functionality
+
 
 Installation & Setup
 Prerequisites
